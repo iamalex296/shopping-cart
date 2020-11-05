@@ -1,14 +1,51 @@
 import React, { useState } from 'react'
 import data from "./data.json"
 import Products from "./components/Products"
+import Filter from './components/Filter.js'
 
 const App = () => {
 
-  const [products, setProducts] = useState({ 
+  const [useProducts, setUseProducts] = useState({ 
     products: data.products,
     size: "",
     sort: ""
   })
+
+  const filterProducts = (event) => {
+    // console.log(event.target.value)
+    if(event.target.value === "") {
+      setUseProducts({
+        ...useProducts, 
+        size: event.target.value, 
+        products: useProducts.products})
+    }
+    else {
+      setUseProducts({
+        ...useProducts,
+        size: event.target.value,
+        products: data.products.filter((product) => product.availableSizes.indexOf(event.target.value) >= 0)
+      })
+    } 
+  }
+
+  const sortProducts = (event) => {
+    // console.log(event.target.value)
+
+    const sort = event.target.value
+
+    setUseProducts((useProducts) => ({
+      ...useProducts,
+      sort: sort,
+      products: useProducts.products.slice().sort((a,b) => (
+        sort === "lowest" ?
+        ((a.price > b.price) ? 1 : -1) :
+        sort === "highest" ? 
+        ((a.price < b.price) ? 1 : -1) :
+        ((a._id < b._id) ? 1: -1)
+      ))
+    }))
+
+  }
 
   return (
     <div className="grid-container">
@@ -18,7 +55,14 @@ const App = () => {
       <main>
         <div className="content">
           <div className="main">
-            <Products products={products.products}></Products>
+            <Filter 
+              count={useProducts.products.length} 
+              size={useProducts.size}
+              sort={useProducts.sort}
+              filterProducts={filterProducts}
+              sortProducts={sortProducts}
+            />
+            <Products products={useProducts.products}></Products>
           </div>
           <div className="sidebar"> 
             cart items
